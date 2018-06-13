@@ -187,7 +187,7 @@ myRing <- make_ring(my_matrix)
 
 Plot the Adjacency Matrix to Determine Last.fm Network - Numbers represent user groups, as individual userIDs were aggregated to form clusters of users to more easily interpret the data; arrows represent user group associations. 
 
-```{r , message = F, warning = F, error=F, echo = F}
+```{r include=F, warning=F, echo=FALSE, comment=""}
 
 png("Last_FM.png", width = 15, height = 15, units = "in", res = 300)
 plot.igraph(adjMat,vertex.size=3, 
@@ -195,15 +195,14 @@ vertex.label.cex=.5,
 layout=layout.fruchterman.reingold(adjMat, niter=10000)) 
 dev.off()
 
-![Network Tree Diagram](~/Development/Last.fm-dataset/Last.fm.png)
+```
+
+```{r, echo=FALSE, fig.cap="Network Groupings Association Graph", out.width = '100%'}
+
+knitr::include_graphics("Last_FM.png")
 
 ```
-stats <- replicate(n.sims, {      
-  r <- rnorm(n = length(mat_rnorm)
-  )
-  as.numeric(ks.test(r
-                     , "prnorm"))
-})
+
 Plot the ring diagram of user group associations - with 5 group associations and 15 group impressions - That doesn't look like a ring, its more of a snake!  
 
 ```{r , message = F, warning = F, error=F, echo = F}

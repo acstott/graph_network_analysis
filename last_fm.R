@@ -126,5 +126,38 @@ myRing.neigh = connect.neighborhood(myRing, 13)
 
 plot(myRing.neigh, vertex.size=33, vertex.label=NA) 
 
+#-----------------------------------------------------------------------------
+# Calculate Stats 
+#-----------------------------------------------------------------------------
+
+mat_rnorm <- rnorm(myRing.neigh)
+
+fit.norm_mat <- fitdist(mat_rnorm, "norm")
+
+fit.norm_mat$aic
+
+n.sims <- 2e4
+
+stats <- replicate(n.sims, {      
+  r <- rnorm(n = length(mat_rnorm)
+             , mean = fit.norm_mat$estimate["mean"]
+             , sd = fit.norm_mat$estimate["sd"]
+  )
+  as.numeric(ks.test(r
+                     , "pnorm"
+                     , mean = fit.norm_mat$estimate["mean"]
+                     , sd = fit.norm_mat$estimate["sd"])
+  )      
+})
+
+plot(ecdf(stats), las = 1, main = "KS-test statistic simulation (CDF)", col = "darkorange", lwd = 1.7)
+grid()
+
+fit <- spline(stats)
+
+my_fit_dist <- spline(fit$x, fit$y)
+
+t <- ks.test(my_fit_dist$x, my_fit_dist$y)
+
 
 
