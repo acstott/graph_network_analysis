@@ -89,7 +89,7 @@ c.) Calculate the adjacency matrix for each of the random graphs simplified in s
 
 d.) Take the cross-product of the adjacency matrix calculated in c with each simplified random graph in b
 
-e.) Make a matrix of eigenvalues determined in d and create a tree from this data using the igraph make_tree funciton – The multiplicity of the eigenvalues are equal to the number of connected components
+e.) Make a matrix of eigenvalues determined in d and create a tree from this data using the igraph make_tree function – The multiplicity of the eigenvalues are equal to the number of connected components
 
 f.) Plot the tree to determine network clustering associations
 
@@ -97,6 +97,7 @@ f.) Plot the tree to determine network clustering associations
 *** After plotting the phylogenetic tree associaitons, I decided to use a ring-model to estimate the number of impressions from each association, using the igraph make_ring function. I increased the number of connections and vertices until the ring graph converged to a circle. The numbe of connections and vertices from the circular ring indicate the number of associations and impressions, respectively. ***
 
 4.) Validate output via hypothesis testing - plot the statistical distribution of the row norms of the matrix used to determine the associations and impressions data - Accept the hypothesis that the number of degrees of freedom in the system between associations and impressions is valid if the P-value is >= 0.95 using a normal distribution. If the hypothesis is accepted, use the degrees of freedom to test advertising campaign reach by correlating user IDs provided in node and edge data with Oracle Data Cloud user behaviour.
+
 Plot the Adjacency Matrix to Determine Last.fm Network - Numbers represent user groups, as individual userIDs were aggregated to form clusters of users to more easily interpret the data; arrows represent user group associations.
 
 
@@ -273,7 +274,8 @@ t <- ks.test(my_fit_dist$x, my_fit_dist$y)
 ```
 
 
-Plot the normal distribution of the data used to produce the ring structure to determine if the hypothesis of group associations and impressions is valid. To start, plot the Cullen & Frey graph to estimate a distribution - I selected normal distribution, with the parameters given below. I then performed a Kolmogorov-Smirnov (KS Test) to get the cumulative distribution function (CDF). From there, I performed a goodness-of-fit test using the spline function, and passed this data back into the KS test to obtain the p-value, which in this case is 1, as shown below for a two-sample KS test. The emperical and theoretical density, Q-Q plot, Empirical and Theoretical CDFs, and P-P plot are also given below for the normal distribution of the ring data. A p-value of > 0.95 means that the data fits a normal distrubution well and we can accept the associations and impressions values generated from the plotting the ring data as valid. 
+Plot the normal distribution of the data used to produce the ring structure to determine if the hypothesis of group associations and impressions is valid. To start, plot the Cullen & Frey graph to estimate a distribution - I selected normal distribution, with the parameters given below. I then performed a Kolmogorov-Smirnov (KS Test) to get the cumulative distribution function (CDF). From there, I performed a goodness-of-fit test using the spline function, and passed this data back into the KS test to obtain the p-value, which in this case is 1, as shown below for a two-sample KS test. The empirical and theoretical density, Q-Q plot, Empirical and Theoretical CDFs, and P-P plot are also given below for the normal distribution of the ring data. A p-value of > 0.95 means that the data fits a normal distribution well and we can accept the associations and impressions values generated from the plotting the ring data as valid.
+
 
 ```{r , message = F, warning = F, error=F, echo = F}
 
