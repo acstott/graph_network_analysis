@@ -1,0 +1,297 @@
+---
+title: "last.fm User Analysis"
+author: "Amanda Stott, PhD"
+date: \`r format(Sys.Date(), "%m-%d-%Y")`\
+output: "html_document"
+this: "R Code"
+puts: "This is #{this}"
+---
+
+
+```{r include=F, warning=F, echo=FALSE, comment=""}
+
+#-----------------------------------------------------------------------------
+# Load Globals 
+#-----------------------------------------------------------------------------
+
+library(dplyr)
+library(data.table)
+library(stringr)  
+library(ggplot2)
+library(purrr)
+library(mongolite)
+library(phytools)
+library(igraph)
+library(data.tree)
+library(mnormt)
+library(fitdistrplus)
+library(logspline)
+
+```
+
+
+```{r setup, include=F, warning=F, echo=FALSE, comment=""}
+
+#-----------------------------------------------------------------------------
+# Load Datasets
+#-----------------------------------------------------------------------------
+
+require("knitr")
+opts_knit$set(root.dir = "~/Development/Last.fm-dataset/data")
+
+nodes <- as.matrix(fread("nodes.csv"))
+
+edges <- as.matrix(fread("edges.csv"))
+
+initial_tree <- make_tree(nodes, edges)
+
+```
+
+Attribute Information:
+
+Last.fm is a music website, founded in the United Kingdom in 2002. It has claimed over 40 million active users based in more than 190 countries. This contains the friendship network crawled in December 2010 by Megan Kearl (makearl@asu.edu). Thanks Megan! 
+
+Dataset via http://socialcomputing.asu.edu/datasets/Last.fm
+
+Data Set Information -- 2 files are included:
+
+1. nodes.csv
+
+-- it's the file of all the users. This file works as a dictionary of all the users in this data set. It's useful for fast reference. It contains of all the node ids used in the dataset.
+
+2. edges.csv
+
+-- this is the friendship network among the users. The friends are represented using edges. Here is an example. 
+
+1,2
+
+This means user with id "1" is friend with user id "2".
+
+-. Basic statistics
+Number of Nodes: 108,493
+Number of Edges: 5,115,300
+
+### Problem Statement: Using the Last.fm Dataset, derive relationships between nodes and edges to determine the interaction pattern of users within the network. Using the interaction pattern, construct a model to identify the number of associations and number of impressions. *** In a real-world scenario, the next step would be to correlate user data with consumer data via Oracle Data Cloud or similar.   
+
+### Steps in the Analysis: 
+
+1.) Determine how we want to graphically represent the data.
+
+*** For this dataset, given that we have a social network with nodes and edges, I selected a tree representation to map the community network relationships between nodes and edges. ***
+
+2.) Clean and simplifying the data to produce meaningful content that is easy to interpret and comprehend - This includes applying appropriate models to fit the data, when appropriate. 
+
+*** As the dataset contains far too many associations to meaningfully represent via a tree diagram, I decided to simplify using a binary adjacency matrix. ***
+
+### Steps in Community Clustering Associations Determination: 
+  
+  a. Generate random graphs according to the G(n,m) Erdos-Renyi model via the igraph package in R 
+  b. Simplify by removing repeat values ***
+  c. Calculate the adjacency matrix for each of the random graphs simplified in step b 
+  -- Keep only random graph matrix elements equal to 1 
+  d. Take the cross-product of the adjacency matrix calculated in c with each simplified random graph in b 
+  e. Make a matrix of eigenvalues determined in d and create a tree from this data using the igraph make_tree funciton
+  -- The multiplicity of the eigenvalues are equal to the number of connected components
+  f. Plot the tree to determine network clustering associations 
+
+3.) Analyze the output - Extract relevant information and present results.
+
+*** After plotting the phylogenetic tree associaitons, I decided to use a ring-model to estimate the number of impressions from each association, using the igraph make_ring function. I increased the number of connections and vertices until the ring graph converged to a circle. The numbe of connections and vertices from the circular ring indicate the number of associations and impressions, respectively. ***
+
+4.) Validate output via hypothesis testing - plot the statistical distributon of the row norms of the matrix used to determine the associations and impressions data - Accept the hypothesis that the number of degrees of freedom in the system between associations and impressions is valid if the P-value is >= 0.95 using a normal distribution. If the hypothesis is accepted, use the degrees of freedome to test advertising campaign reach by correlating user IDs provided in node and edge data with Oracle Data Cloud user behaviour.  
+
+
+```{r include=F, warning=F, echo=FALSE, comment=""}
+
+#-----------------------------------------------------------------------------
+# Generate a Pseudo-Random Number to Start Probility Distribution Calculation 
+#-----------------------------------------------------------------------------
+
+set.seed(100)
+
+#-----------------------------------------------------------------------------
+# Generate Tree of Real Data using igraph Package 
+#-----------------------------------------------------------------------------
+
+er <- as.matrix(sample_gnm(nrow(nodes), nrow(edges)))
+
+er <- set_graph_attr(er, "name", "Last_FM")
+
+e4s <- simplify(er, 
+                remove.multiple = T, 
+                remove.loops = F, 
+                edge.attr.comb=c(weight="sum", type="ignore"))
+
+#-----------------------------------------------------------------------------
+# Calculate Adjacency Matrices 
+#-----------------------------------------------------------------------------
+
+e4_s_one <- (e4s[1] == 1) 
+
+t_e4_s_one <- which(e4_s_one == TRUE)
+t_in_e1 <- t_e4_s_one[e4s[1]] 
+
+e4_s_two <- (e4s[2] == 1)
+t_e4_s_two <- which(e4_s_two == TRUE)
+t_in_e2 <- t_e4_s_two[e4s[2]]
+
+e4_s_three <- (e4s[3] == 1)
+t_e4_s_three <- which(e4_s_three == TRUE)
+t_in_e3 <- t_e4_s_three[e4s[3]]
+
+e4_s_four <- (e4s[4] == 1)
+t_e4_s_four <- which(e4_s_four == TRUE)
+t_in_e4 <- t_e4_s_four[e4s[4]]
+
+e4_s_five <- (e4s[5] == 1)
+t_e4_s_five <- which(e4_s_five == TRUE)
+t_in_e5 <- t_e4_s_five[e4s[5]]
+
+e4_s_six <- (e4s[6] == 1)
+t_e4_s_six <- which(e4_s_six == TRUE)
+t_in_e6 <- t_e4_s_six[e4s[6]]
+
+e4_s_seven <- (e4s[7] == 1)
+t_e4_s_seven <- which(e4_s_seven == TRUE)
+t_in_e7 <- t_e4_s_seven[e4s[7]]
+
+e4_s_eight <- (e4s[8] == 1)
+t_e4_s_eight <- which(e4_s_eight == TRUE)
+t_in_e8 <- t_e4_s_eight[e4s[8]]
+
+e4_s_nine <- (e4s[9] == 1)
+t_e4_s_nine <- which(e4_s_nine == TRUE)
+t_in_e9 <- t_e4_s_nine[e4s[9]]
+
+e4_s_ten <- (e4s[10] == 1)
+t_e4_s_ten <- which(e4_s_ten == TRUE)
+t_in_e10 <- t_e4_s_ten[e4s[10]]
+
+my_matrix <- as.matrix(t_in_e1[1],
+                       t_in_e2[1], 
+                       t_in_e3[1], 
+                       t_in_e4[1],
+                       t_in_e5[1],
+                       t_in_e6[1],
+                       t_in_e7[1],
+                       t_in_e8[1],
+                       t_in_e9[1],
+                       t_in_e10[1])
+
+adjMat <- make_tree(my_matrix)
+
+myRing <- make_ring(my_matrix)
+
+
+```
+
+Plot the Adjacency Matrix to Determine Last.fm Network - Numbers represent user groups, as individual userIDs were aggregated to form clusters of users to more easily interpret the data; arrows represent user group associations. 
+
+```{r , message = F, warning = F, error=F, echo = F}
+
+png("Last_FM.png", width = 15, height = 15, units = "in", res = 300)
+plot.igraph(adjMat,vertex.size=3, 
+vertex.label.cex=.5, 
+layout=layout.fruchterman.reingold(adjMat, niter=10000)) 
+dev.off()
+
+![Network Tree Diagram](~/Development/Last.fm-dataset/Last.fm.png)
+
+```
+stats <- replicate(n.sims, {      
+  r <- rnorm(n = length(mat_rnorm)
+  )
+  as.numeric(ks.test(r
+                     , "prnorm"))
+})
+Plot the ring diagram of user group associations - with 5 group associations and 15 group impressions - That doesn't look like a ring, its more of a snake!  
+
+```{r , message = F, warning = F, error=F, echo = F}
+
+myRing.neigh = connect.neighborhood(myRing, 5)
+
+plot(myRing.neigh, vertex.size=15, vertex.label=NA) 
+
+```
+
+Plot the ring diagram of user group associations - increasing the value this time to 10 group associations and 30 group impressions - this produces ovbious smoothing, but not quite a ring yet. 
+
+```{r , message = F, warning = F, error=F, echo = F}
+
+myRing.neigh = connect.neighborhood(myRing, 10)
+
+plot(myRing.neigh, vertex.size=25, vertex.label=NA) 
+
+```
+
+Plot the ring diagram of user group associations - increasing the value this time to 12 group associations and 32 group impressions - this produces even more smoothing, and a nearly symmetrical structure. 
+
+```{r , message = F, warning = F, error=F, echo = F}
+
+myRing.neigh = connect.neighborhood(myRing, 12)
+
+plot(myRing.neigh, vertex.size=32, vertex.label=NA) 
+
+```
+
+Plot the ring diagram of user group associations - increasing the value this time to 17 group associations and 37 group impressions produces a circular ring.  
+
+```{r , message = F, warning = F, error=F, echo = F}
+
+myRing.neigh = connect.neighborhood(myRing, 17)
+
+plot(myRing.neigh, vertex.size = 37, vertex.label=NA) 
+
+```
+
+```{r include=F, warning=F, echo=FALSE, comment=""}
+
+mat_rnorm <- rnorm(myRing.neigh)
+
+fit.norm_mat <- fitdist(mat_rnorm, "norm")
+
+fit.norm_mat$aic
+
+n.sims <- 2e4
+
+stats <- replicate(n.sims, {      
+  r <- rnorm(n = length(mat_rnorm)
+                , mean = fit.norm_mat$estimate["mean"]
+                , sd = fit.norm_mat$estimate["sd"]
+  )
+  as.numeric(ks.test(r
+                     , "pnorm"
+                     , mean = fit.norm_mat$estimate["mean"]
+                     , sd = fit.norm_mat$estimate["sd"])
+  )      
+})
+
+plot(ecdf(stats), las = 1, main = "KS-test statistic simulation (CDF)", col = "darkorange", lwd = 1.7)
+grid()
+
+fit <- spline(stats)
+
+my_fit_dist <- spline(fit$x, fit$y)
+
+t <- ks.test(my_fit_dist$x, my_fit_dist$y)
+
+```
+
+
+Plot the normal distribution of the data used to produce the ring structure to determine if the hypothesis of group associations and impressions is valid. To start, plot the Cullen & Frey graph to estimate a distribution - I selected normal distribution, with the parameters given below. I then performed a Kolmogorov-Smirnov (KS Test) to get the cumulative distribution function (CDF). From there, I performed a goodness-of-fit test using the spline function, and passed this data back into the KS test to obtain the p-value, which in this case is 1, as shown below for a two-sample KS test. The emperical and theoretical density, Q-Q plot, Empirical and Theoretical CDFs, and P-P plot are also given below for the normal distribution of the ring data. A p-value of > 0.95 means that the data fits a normal distrubution well and we can accept the associations and impressions values generated from the plotting the ring data as valid. 
+
+```{r , message = F, warning = F, error=F, echo = F}
+
+descdist(mat_rnorm, discrete = FALSE)
+
+fit.norm_mat
+
+plot(ecdf(stats), las = 1, main = "KS-test statistic simulation (CDF)", col = "darkorange", lwd = 1.7)
+grid()
+
+t
+
+plot(fit.norm_mat)
+
+```
+
