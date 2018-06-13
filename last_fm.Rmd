@@ -71,34 +71,33 @@ This means user with id "1" is friend with user id "2".
 Number of Nodes: 108,493
 Number of Edges: 5,115,300
 
-### Problem Statement: Using the Last.fm Dataset, derive relationships between nodes and edges to determine the interaction pattern of users within the network. Using the interaction pattern, construct a model to identify the number of associations and number of impressions. *** In a real-world scenario, the next step would be to correlate user data with consumer data via Oracle Data Cloud or similar.   
-
-### Steps in the Analysis: 
-
+Problem Statement: Using the Last.fm Dataset, derive relationships between nodes and edges to determine the interaction pattern of users within the network. Using the interaction pattern, construct a model to identify the number of associations and number of impressions. *** In a real-world scenario, the next step would be to correlate user data with consumer data via Oracle Data Cloud or similar.
+Steps in the Analysis:
 1.) Determine how we want to graphically represent the data.
-
 *** For this dataset, given that we have a social network with nodes and edges, I selected a tree representation to map the community network relationships between nodes and edges. ***
 
-2.) Clean and simplifying the data to produce meaningful content that is easy to interpret and comprehend - This includes applying appropriate models to fit the data, when appropriate. 
-
+2.) Clean and simplifying the data to produce meaningful content that is easy to interpret and comprehend - This includes applying appropriate models to fit the data, when appropriate.
 *** As the dataset contains far too many associations to meaningfully represent via a tree diagram, I decided to simplify using a binary adjacency matrix. ***
 
-### Steps in Community Clustering Associations Determination: 
-  
-  a. Generate random graphs according to the G(n,m) Erdos-Renyi model via the igraph package in R 
-  b. Simplify by removing repeat values ***
-  c. Calculate the adjacency matrix for each of the random graphs simplified in step b 
-  -- Keep only random graph matrix elements equal to 1 
-  d. Take the cross-product of the adjacency matrix calculated in c with each simplified random graph in b 
-  e. Make a matrix of eigenvalues determined in d and create a tree from this data using the igraph make_tree funciton
-  -- The multiplicity of the eigenvalues are equal to the number of connected components
-  f. Plot the tree to determine network clustering associations 
+Steps in Community Clustering Associations Determination:
+
+a.)  Generate random graphs according to the G(n,m) Erdos-Renyi model via the igraph package in R
+
+b.) Simplify by removing repeat values ***
+
+c.) Calculate the adjacency matrix for each of the random graphs simplified in step b – Keep only random graph matrix elements equal to 1
+
+d.) Take the cross-product of the adjacency matrix calculated in c with each simplified random graph in b
+
+e.) Make a matrix of eigenvalues determined in d and create a tree from this data using the igraph make_tree funciton – The multiplicity of the eigenvalues are equal to the number of connected components
+
+f.) Plot the tree to determine network clustering associations
 
 3.) Analyze the output - Extract relevant information and present results.
-
 *** After plotting the phylogenetic tree associaitons, I decided to use a ring-model to estimate the number of impressions from each association, using the igraph make_ring function. I increased the number of connections and vertices until the ring graph converged to a circle. The numbe of connections and vertices from the circular ring indicate the number of associations and impressions, respectively. ***
 
-4.) Validate output via hypothesis testing - plot the statistical distributon of the row norms of the matrix used to determine the associations and impressions data - Accept the hypothesis that the number of degrees of freedom in the system between associations and impressions is valid if the P-value is >= 0.95 using a normal distribution. If the hypothesis is accepted, use the degrees of freedome to test advertising campaign reach by correlating user IDs provided in node and edge data with Oracle Data Cloud user behaviour.  
+4.) Validate output via hypothesis testing - plot the statistical distribution of the row norms of the matrix used to determine the associations and impressions data - Accept the hypothesis that the number of degrees of freedom in the system between associations and impressions is valid if the P-value is >= 0.95 using a normal distribution. If the hypothesis is accepted, use the degrees of freedom to test advertising campaign reach by correlating user IDs provided in node and edge data with Oracle Data Cloud user behaviour.
+Plot the Adjacency Matrix to Determine Last.fm Network - Numbers represent user groups, as individual userIDs were aggregated to form clusters of users to more easily interpret the data; arrows represent user group associations.
 
 
 ```{r include=F, warning=F, echo=FALSE, comment=""}
@@ -264,9 +263,6 @@ stats <- replicate(n.sims, {
                      , sd = fit.norm_mat$estimate["sd"])
   )      
 })
-
-plot(ecdf(stats), las = 1, main = "KS-test statistic simulation (CDF)", col = "darkorange", lwd = 1.7)
-grid()
 
 fit <- spline(stats)
 
